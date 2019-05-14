@@ -39,96 +39,30 @@ C size		$7
 
 ASM_START()
 PROLOGUE(mpn_sub_nc)
-	ld	$10,0($5)
-	ld	$11,0($6)
-
-	daddiu	$7,$7,-1
-	and	$9,$7,4-1	C number of limbs in first loop
-	beq	$9,$0,.L0	C if multiple of 4 limbs, skip first loop
-	 move	$2,$8
-	b	.Loop0
-	 dsubu	$7,$7,$9
+	move	$2,$8
+	b	Loop
 EPILOGUE()
 PROLOGUE(mpn_sub_n)
-	ld	$10,0($5)
-	ld	$11,0($6)
+	move	$2,$0
+Loop:
+	ld	$9,0($5)
+	ld	$10,0($6)
+	daddiu	$7,$7,-1	C decrement loop counter
 
-	daddiu	$7,$7,-1
-	and	$9,$7,4-1	C number of limbs in first loop
-	beq	$9,$0,.L0	C if multiple of 4 limbs, skip first loop
-	 move	$2,$0
+	daddu	$10,$2,$10
+	sltu	$2,$10,$2
+	dsubu	$10,$9,$10
+	sltu	$9,$9,$10
 
-	dsubu	$7,$7,$9
-
-.Loop0:	daddiu	$9,$9,-1
-	ld	$12,8($5)
-	daddu	$11,$11,$2
-	ld	$13,8($6)
-	sltu	$8,$11,$2
-	dsubu	$11,$10,$11
-	sltu	$2,$10,$11
-	sd	$11,0($4)
-	or	$2,$2,$8
+	sd	$10,0($4)
 
 	daddiu	$5,$5,8
 	daddiu	$6,$6,8
-	move	$10,$12
-	move	$11,$13
-	bne	$9,$0,.Loop0
-	 daddiu	$4,$4,8
+	daddiu  $4,$4,8
 
-.L0:	beq	$7,$0,.Lend
-	 nop
-
-.Loop:	daddiu	$7,$7,-4
-
-	ld	$12,8($5)
-	dsubu	$11,$10,$11
-	ld	$13,8($6)
-	sltu	$8,$10,$11
-	dsubu	$14,$11,$2
-	sltu	$2,$11,$14
-	sd	$14,0($4)
-	or	$2,$2,$8
-
-	ld	$10,16($5)
-	dsubu	$13,$12,$13
-	ld	$11,16($6)
-	sltu	$8,$12,$13
-	dsubu	$14,$13,$2
-	sltu	$2,$13,$14
-	sd	$14,8($4)
-	or	$2,$2,$8
-
-	ld	$12,24($5)
-	dsubu	$11,$10,$11
-	ld	$13,24($6)
-	sltu	$8,$10,$11
-	dsubu	$14,$11,$2
-	sltu	$2,$11,$14
-	sd	$14,16($4)
-	or	$2,$2,$8
-
-	ld	$10,32($5)
-	dsubu	$13,$12,$13
-	ld	$11,32($6)
-	sltu	$8,$12,$13
-	dsubu	$14,$13,$2
-	sltu	$2,$13,$14
-	sd	$14,24($4)
-	or	$2,$2,$8
-
-	daddiu	$5,$5,32
-	daddiu	$6,$6,32
-
-	bne	$7,$0,.Loop
-	 daddiu	$4,$4,32
-
-.Lend:	daddu	$11,$11,$2
-	sltu	$8,$11,$2
-	dsubu	$11,$10,$11
-	sltu	$2,$10,$11
-	sd	$11,0($4)
+	bgtz	$7,Loop
+	daddu	$2,$2,$9
+Lend:
 	j	$31
-	or	$2,$2,$8
+	nop
 EPILOGUE()

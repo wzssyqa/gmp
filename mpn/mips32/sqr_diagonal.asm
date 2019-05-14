@@ -1,7 +1,6 @@
-dnl  MIPS64 mpn_add_n -- Add two limb vectors of the same length > 0 and store
-dnl  sum in a third limb vector.
+dnl  MIPS64 mpn_sqr_diagonal.
 
-dnl  Copyright 1995, 2000-2002, 2011 Free Software Foundation, Inc.
+dnl  Copyright 2001, 2002 Free Software Foundation, Inc.
 
 dnl  This file is part of the GNU MP Library.
 dnl
@@ -29,37 +28,33 @@ dnl  You should have received copies of the GNU General Public License and the
 dnl  GNU Lesser General Public License along with the GNU MP Library.  If not,
 dnl  see https://www.gnu.org/licenses/.
 
+
+dnl  INPUT PARAMETERS
+dnl  rp		$4
+dnl  up		$5
+dnl  n		$6
+
 include(`../config.m4')
 
-C INPUT PARAMETERS
-C res_ptr	$4
-C s1_ptr	$5
-C s2_ptr	$6
-C size		$7
-
 ASM_START()
-PROLOGUE(mpn_add_n)
+PROLOGUE(mpn_sqr_diagonal)
 
-	move	$2,$0
 Loop:
-	lw	$9,0($5)
-	lw	$10,0($6)
-	addiu	$7,$7,-1	C decrement loop counter
+	lw	$8,0($5)
+	addiu	$6,$6,-1
 
-	addu	$9,$2,$9
-	sltu	$2,$9,$2
-	addu	$10,$9,$10
-	sltu	$9,$10,$9
+	multu	$8,$8
+	mflo	$10
+	mfhi	$9
 
 	sw	$10,0($4)
+	sw	$9,8($4)
 
 	addiu	$5,$5,4
-	addiu	$6,$6,4
-	addiu	$4,$4,4
 
-	bgtz	$7,Loop
-	addu	$2,$2,$9
+	bgtz	$6,Loop
+	addiu	$4,$4,8
 Lend:
 	j	$31
 	nop
-EPILOGUE()
+EPILOGUE(mpn_sqr_diagonal)

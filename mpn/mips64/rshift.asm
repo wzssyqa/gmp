@@ -43,7 +43,7 @@ PROLOGUE(mpn_rshift)
 	daddiu	$6,$6,-1
 	and	$9,$6,4-1	C number of limbs in first loop
 	beq	$9,$0,.L0	C if multiple of 4 limbs, skip first loop
-	 dsll	$2,$10,$13	C compute function result
+	dsll	$2,$10,$13	C compute function result
 
 	dsubu	$6,$6,$9
 
@@ -56,10 +56,10 @@ PROLOGUE(mpn_rshift)
 	move	$10,$3
 	or	$8,$11,$12
 	bne	$9,$0,.Loop0
-	 sd	$8,-8($4)
+	sd	$8,-8($4)
 
 .L0:	beq	$6,$0,.Lend
-	 nop
+	nop
 
 .Loop:	ld	$3,8($5)
 	daddiu	$4,$4,32
@@ -88,7 +88,7 @@ PROLOGUE(mpn_rshift)
 	daddiu	$5,$5,32
 	or	$8,$14,$9
 	bgtz	$6,.Loop
-	 sd	$8,-8($4)
+	sd	$8,-8($4)
 
 .Lend:	dsrl	$8,$10,$7
 	j	$31

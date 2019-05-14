@@ -40,53 +40,26 @@ C s2_limb	$7
 ASM_START()
 PROLOGUE(mpn_mul_1)
 
-C feed-in phase 0
-	ld	$8,0($5)
-
-C feed-in phase 1
-	daddiu	$5,$5,8
-	dmultu	$8,$7
-
-	daddiu	$6,$6,-1
-	beq	$6,$0,$LC0
-	 move	$2,$0		C zero cy2
-
-	daddiu	$6,$6,-1
-	beq	$6,$0,$LC1
-	ld	$8,0($5)	C load new s1 limb as early as possible
-
-Loop:	nop
-	mflo	$10
-	mfhi	$9
-	daddiu	$5,$5,8
-	daddu	$10,$10,$2	C add old carry limb to low product limb
-	dmultu	$8,$7
-	ld	$8,0($5)	C load new s1 limb as early as possible
+	move	$2,$0		C zero cy2
+Loop:
+	ld      $8,0($5)
 	daddiu	$6,$6,-1	C decrement loop counter
-	sltu	$2,$10,$2	C carry from previous addition -> $2
-	nop
-	nop
-	sd	$10,0($4)
-	daddiu	$4,$4,8
-	bne	$6,$0,Loop
-	 daddu	$2,$9,$2	C add high product limb and carry from addition
 
-C wind-down phase 1
-$LC1:	mflo	$10
+	dmultu	$7,$8
+	mflo	$3
+
+	daddu	$3,$3,$2	C add old carry limb to low product limb
+	sltu	$2,$3,$2	C carry from previous addition -> $2
+	sd	$3,0($4)
+
 	mfhi	$9
-	daddu	$10,$10,$2
-	sltu	$2,$10,$2
-	dmultu	$8,$7
-	sd	$10,0($4)
+
+	daddiu  $5,$5,8
 	daddiu	$4,$4,8
+
+	bgtz	$6,Loop
 	daddu	$2,$9,$2	C add high product limb and carry from addition
-
-C wind-down phase 0
-$LC0:	mflo	$10
-	mfhi	$9
-	daddu	$10,$10,$2
-	sltu	$2,$10,$2
-	sd	$10,0($4)
+Lend:
 	j	$31
-	daddu	$2,$9,$2	C add high product limb and carry from addition
+	nop
 EPILOGUE(mpn_mul_1)

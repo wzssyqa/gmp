@@ -1,6 +1,6 @@
-dnl  MIPS32 umul_ppmm -- longlong.h support.
+dnl  MIPS64 umul_ppmm -- longlong.h support.
 
-dnl  Copyright 1999, 2002 Free Software Foundation, Inc.
+dnl  Copyright 2002 Free Software Foundation, Inc.
 
 dnl  This file is part of the GNU MP Library.
 dnl
@@ -41,5 +41,5 @@ PROLOGUE(mpn_umul_ppmm)
 	mflo	$3
 	mfhi	$2
 	j	$31
-	sw	$3,0($4)
+	sd	$3,0($4)
 EPILOGUE(mpn_umul_ppmm)

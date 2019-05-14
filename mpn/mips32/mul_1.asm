@@ -1,7 +1,7 @@
-dnl  MIPS32 mpn_mul_1 -- Multiply a limb vector with a single limb and store
+dnl  MIPS64 mpn_mul_1 -- Multiply a limb vector with a single limb and store
 dnl  the product in a second limb vector.
 
-dnl  Copyright 1992, 1994, 1996, 2000, 2002 Free Software Foundation, Inc.
+dnl  Copyright 1992, 1994, 1995, 2000-2002 Free Software Foundation, Inc.
 
 dnl  This file is part of the GNU MP Library.
 dnl
@@ -40,50 +40,26 @@ C s2_limb	$7
 ASM_START()
 PROLOGUE(mpn_mul_1)
 
-C feed-in phase 0
-	lw	$8,0($5)
-
-C feed-in phase 1
-	addiu	$5,$5,4
-	multu	$8,$7
-
-	addiu	$6,$6,-1
-	beq	$6,$0,$LC0
-	 move	$2,$0		C zero cy2
-
-	addiu	$6,$6,-1
-	beq	$6,$0,$LC1
-	lw	$8,0($5)	C load new s1 limb as early as possible
-
-Loop:	mflo	$10
-	mfhi	$9
-	addiu	$5,$5,4
-	addu	$10,$10,$2	C add old carry limb to low product limb
-	multu	$8,$7
-	lw	$8,0($5)	C load new s1 limb as early as possible
+	move	$2,$0		C zero cy2
+Loop:
+	lw      $8,0($5)
 	addiu	$6,$6,-1	C decrement loop counter
-	sltu	$2,$10,$2	C carry from previous addition -> $2
-	sw	$10,0($4)
-	addiu	$4,$4,4
-	bne	$6,$0,Loop
-	 addu	$2,$9,$2	C add high product limb and carry from addition
 
-C wind-down phase 1
-$LC1:	mflo	$10
+	multu	$7,$8
+	mflo	$3
+
+	addu	$3,$3,$2	C add old carry limb to low product limb
+	sltu	$2,$3,$2	C carry from previous addition -> $2
+	sw	$3,0($4)
+
 	mfhi	$9
-	addu	$10,$10,$2
-	sltu	$2,$10,$2
-	multu	$8,$7
-	sw	$10,0($4)
+
+	addiu	$5,$5,4
 	addiu	$4,$4,4
+
+	bgtz	$6,Loop
 	addu	$2,$9,$2	C add high product limb and carry from addition
-
-C wind-down phase 0
-$LC0:	mflo	$10
-	mfhi	$9
-	addu	$10,$10,$2
-	sltu	$2,$10,$2
-	sw	$10,0($4)
+Lend:
 	j	$31
-	addu	$2,$9,$2	C add high product limb and carry from addition
+	nop
 EPILOGUE(mpn_mul_1)
