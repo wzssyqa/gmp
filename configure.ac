@@ -1006,6 +1006,16 @@ case $host in
     # this suits both mips32 and mips64
     GMP_INCLUDE_MPN(mips32/mips-defs.m4)
 
+    mips_isa_rev=$($CC -dM -E - < /dev/null | grep "__mips_isa_rev"| cut -d ' '  -f3)
+
+    if test -z "$mips_isa_rev"; then
+      mips_isa_rev=0
+    fi
+
+    if test $mips_isa_rev -ge 6; then
+      path="mips32/r6"
+    fi
+
     case $host in
       [mips64*-*-* | mipsisa64*-*-* | mips*-*-irix[6789]*])
         abilist="n32 64 o32"
@@ -1026,6 +1036,11 @@ case $host in
         cc_64_cflags="-O2 -64"		# no -g, it disables all optimizations
         cc_64_ldflags="-Wc,-64"
         path_64="mips64"
+
+        if test $mips_isa_rev -ge 6; then
+          path_n32="mips64/r6"
+          path_64="mips64/r6"
+        fi
         ;;
     esac
     ;;
